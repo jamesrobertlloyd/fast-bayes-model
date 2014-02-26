@@ -1,7 +1,4 @@
-*.py[cod]
-
-# C extensions
-*.so
+*.py[co]
 
 # Packages
 *.egg
@@ -15,9 +12,6 @@ var
 sdist
 develop-eggs
 .installed.cfg
-lib
-lib64
-__pycache__
 
 # Installer logs
 pip-log.txt
@@ -25,12 +19,48 @@ pip-log.txt
 # Unit test / coverage reports
 .coverage
 .tox
-nosetests.xml
 
-# Translations
+#Translations
 *.mo
 
-# Mr Developer
+#Mr Developer
 .mr.developer.cfg
-.project
-.pydevproject
+
+*.aux
+*.swp
+*.bbl
+*.blg
+*.dvi
+*.fdb_latexmk
+*.glg
+*.glo
+*.gls
+*.idx
+*.ilg
+*.ind
+*.ist
+*.lof
+*.log
+*.lot
+*.nav
+*.nlo
+*.out
+*.pdfsync
+*.ps
+*.snm
+*.synctex.gz
+*.toc
+*.vrb
+*.maf
+*.mtc
+*.mtc0
+latex/*.pdf
+posters/jl-tea/tex/*.pdf
+
+*~
+.metadata/
+*.DS_Store
+*.backup
+
+temp/
+scratch/
