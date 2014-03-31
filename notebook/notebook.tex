@@ -98,19 +98,92 @@ Source code is available at \url{https://github.com/jamesrobertlloyd/fast-bayes-
 
 \section{31 March - Defining the problem and potential solutions}
 
-\subsection{Disorganised notes}
+\subsection{What are we attempting to optimise?}
 
-How do we keep everything dimensionless?
-Are Bayes factors dimensionless - or do we also need to divide by the number of data points?
+We are attempting to maximise the marginal likelihood of a Gaussian process model with a compositionally constructed kernel.
+We are attempting to do this quickly.
+
+\subsection{What are the main difficulties}
+
+Gradient based optimisation of marginal likelihoods works quite well but suffers from multi-modality and does not address learning the structure of the kernel.
+Random restarts can alleviate problems of multi-modality but when combined with learning the structure simulatenously this creates many optimisation problems.
+
+The parameter space of the kernels grows as the kernels grow, which presents difficulties for some model based optimisation techniques.
+A more constant parameter space is the kernel evaluations themselves, but this is potentially a very large parameter space.
+
+\subsection{How will optimise it?}
+
+We could view this as a policy learning problem, where we directly optimise some search policy.
+This could be difficult since our action space increases as the kernels increase in size, but maybe this is already solved.
+I am least familiar with this option.
+
+Model based optimisation using a standard tool is possible, but we would have to deal with a growing parameter space.
+In principle this should be ok, using arc kernels for GPs (see raiders of the lost architecture) or flags that turn off parameters in Random Forest (\eg auto WEKA).
+We would almost certainly need to include categorical parameters that indicated the dimension and type of kernel being used to generalise successfully.
+
+We could also view this as a multi-output Bayesian optimisation problem / racing algorithms problem.
+This would involve computing cheap approximations to the marginal likelihood \eg via FITC or by random kitchen sinks and gradually prune which models should not be considered (optimised) further.
+This could be done without paying attention to kernel parameters, just viewing everything as a separate model at each layer in the search.
+
+Another way to view this is to try to create a model that can predict marginal likelihoods given the current marginal likelihood and statistics of the current model and data.
+This has the benefit of being able to learn from past data sets offline (and therefore we have unlimited synthetic data).
+The difficulties here are producing statistics that can be used on different data sets and making the output of prediction easy to compute.
+
+Ideally we would use information both from past data set and from the search, but doing so elegantly might be hard.
+Can we somehow fuse offline model based predictions and online based predictions in an elegant way?
+The full solution would probably have to invent latent variables for data sets to correctly fuse the information to an appropriate extent.
+
+\subsection{What quantities will we want to compute?}
+
+\subsubsection{Outputs}
+
+Most likely we want to estimate marginal likelihoods, or likelihood ratios.
+Likelihood ratios are dimensionless, but are they dependent on some properties of the data - but maybe these properties of the data can be inputs to the predictor?
+Do we divide by the number of data points?
 We can test this for \iid noise and maybe for a single squared exp and see what happens theoretically and empirically.
 
-Approximations to marginal likelihoods
+Approximations to marginal likelihoods to be considered are
 \begin{itemize}
   \item FITC
   \item SoR
   \item Iterative methods (see \eg Skilling)
   \item RKS
 \end{itemize}
+
+\subsubsection{Inputs}
+
+If in the framework of offline model based optimisation (I think this is a new term) we might consider computing statistics of the data and of residuals (see model checking plots in ABCD output).
+Potential statistics include
+\begin{itemize}
+  \item Correlogram
+  \item Periodogram
+  \item Q-Q
+  \item Stats of the inputs and outputs
+\end{itemize}
+But do we extract features or calculate statistics at several parameter values?
+How do we normalise statistics?
+Not all aspects of data can be normalised safely, so perhaps we should compute high order moments of our data.
+Probabilities, or absolute values or something similar?
+Some theory and some empicism can help here.
+How do we generalise statistics to multi-d data?
+Do we compute stats on data or residuals?
+Which residuals?
+How do I ensure all of my quantities are dimensionless in a relavent way \eg scale factors compared to data, length scales compared across several datasets?
+
+In the framework of online model based optimisation how do I appropriately share information between different shape kernels?
+Some sort of categorical variable setup with a growing parameter space as the search continues?
+
+\subsection{What related work is out there?}
+
+What does a literature search return?
+Learning to learn is a thing in different guises - ask Jonas and Isabel for the different words and whether or not people have applied it to learning the structure of models \eg graphical model structure learning.
+
+\subsection{How else could we solve this problem?}
+
+Is there an MKL related solution?
+Potentially somilar to the hierarchical kernel learning work?
+
+\subsection{Other thoughts}
 
 Taylor series \eg
 \begin{eqnarray}
@@ -120,34 +193,19 @@ Taylor series \eg
 \end{eqnarray}
 Will this help us with computing the improvement that a new kernel will bring?
 
-Computing statistics of interest
-\begin{itemize}
-  \item Correlogram
-  \item Periodogram
-  \item Q-Q
-\end{itemize}
-But do we extract features or calculate statistics at several parameter values?
-How do we normalise statistics?
-Probabilities, or absolute values or something similar?
-Some theory and some empicism can help here.
-How do we generalise statistics to multi-d data?
-Do we compute stats on data or residuals?
-Which residuals?
-
-Should I be using FITC/RKS/\dots optimisation in a racing algorithm framework?
-Or use the optimised parameters as features for a regression algorithm?
-
-Or should I be directly optimising policies directly.
-The action space is growing but so is the parameter space, so maybe there is hope.
-
 To what extent is it safe to use synthetic data and real data.
 Am I trying to create models that quickly optimise models when the modelling assumptions are correct or do I want good performance on a random dataset in the wild?
+And how different are these things?
+The effectiveness of these different approaches can be evaluated using careful splits of data.
 
-How do I ensure all of my quantities are dimensionless in a relavent way \eg scale factors compared to data, length scales compared across several datasets.
+\subsection{Next steps}
 
-What does a literature search return.
-Learning to learn is a thing in different guises - ask Jonas and Isabel for the different words and whether or not people have applied it to learning the structure of models \eg graphical model structure learning.
-
+\begin{itemize}
+   \item Investigate appropriate dimensionless versions of marginal likelihoods
+   \item Find relevant literature on learning to build models - ask Jonas and Isabel
+   \item Find relevant literature on model based optimisation in difficult parameter spaces
+   \item Try to create a parameter space for the simplest model based optimisation variant
+\end{itemize}
 \newpage
 
 %\appendix
