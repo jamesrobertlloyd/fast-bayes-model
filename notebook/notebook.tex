@@ -206,6 +206,94 @@ The effectiveness of these different approaches can be evaluated using careful s
    \item Find relevant literature on model based optimisation in difficult parameter spaces
    \item Try to create a parameter space for the simplest model based optimisation variant
 \end{itemize}
+
+\section{1 April - Making marginal likelihoods dimensionless}
+
+\subsection{\iid data}
+
+Suppose $(X_i)_{i\in\mathbb{N}}$ is an \iid sequence of random variables.
+Then a generative probabilistic program for this sequence is
+\begin{eqnarray}
+X_i    & \simiid & p(.).
+\end{eqnarray}
+The log likelihood (of a finite subset) is given by
+\begin{equation}
+\sum \log p(X_i).
+\end{equation}
+The expectation of this quantity grows linearly with the number of data points, suggesting an obvious way to scale the log likelihood to make it comparable across different data sets.
+
+\subsection{Exchangeable data}
+
+Suppose we now make the weaker assumption that $(X_i)_{i\in\mathbb{N}}$ is exchangeable.
+Then a generative probabilistic program for this sequence is
+\begin{eqnarray}
+\theta & \sim    & \Theta(.) \\
+X_i    & \simiid & p(.\given\theta).
+\end{eqnarray}
+with log marginal likelihood of
+\begin{equation}
+\int \log\Theta(\theta)\textrm{d}\theta + \sum \int \log p(X_i\given\theta)\textrm{d}\theta.
+\end{equation}
+This no longer has such a nice scaling, which means that the log Bayes factor between an exchangeable model and \iid model will not have a nice scaling.
+
+\subsection{Exponentiated quadratic data}
+
+The scaling of expected log marginal likelihood will depend on the lengthscale and the distribution of input locations.
+Really small lengthscales will approximate the \iid case, really long lengthscales will approximate the exchangeable case.
+Medium lengthscales are not between these two extremes though (tested empirically).
+
+\subsection{Gaussian processes}
+
+Log marginal likelihood is
+\begin{equation}
+-\log|K| - y'K^{-1}y
+\end{equation}
+which has expectation (under correct model assumptions)
+\begin{equation}
+-\log|K| - n.
+\end{equation}
+
+So the deviation from proportionality is determined by the extent to which the log determinant does not scale linearly.
+This means that deviation will be largest for small lengthscales and large signal to noise ratios.
+
+\subsection{Some empiricism}
+
+In figure~\ref{fig:lml_per_n} I have plotted log marginal likelihood per data point against number of data points.
+A flat line would indicate proportionality of log marginal likelihood.
+For a constant function + noise (left) it takes a very high signal to noise ratio (see title) before deviations from equality show up.
+However, for a relatively short (not very short) lengthscale SE we observe large deviations without such a large signal to noise ratio.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.32\columnwidth]{figures/ml-per-n/const}
+\includegraphics[width=0.32\columnwidth]{figures/ml-per-n/SE}
+\includegraphics[width=0.32\columnwidth]{figures/ml-per-n/SE-longer}
+\caption{
+Left: Constant + noise.
+Middle: Short lengthscale + noise.
+Right: Longer lengthscale + noise.
+}
+\label{fig:lml_per_n}
+\end{figure}
+
+The figures show that the disagreement from proportionality decreases as the number of data points increases, but the amount of data required before this happens increases with the complexity / like of \iid-ness of the model.
+
+For Bayes factors, the relative complexity of the models will determine if the equivalent of these plots tends to a constant from above or below.
+So, something predicting changes in Bayes factors will have to estimate the current model complexity and the new model complexity as well as fit related terms which grow proportionally.
+
+\subsection{Conclusions}
+
+The scaling of marginal likelihoods depends on the model.
+This scaling will depend on the models being compared and the true data generation process.
+Doing fancy mathematics seems like a difficult route given that we ultimately need to predict the Bayes factor after running an optimiser.-
+
+\subsection{Next steps}
+
+\begin{itemize}
+  \item What statistics will best characterise the scaling of the marginal likelihood and Bayes factors?
+  \item Or can we do some more mathematics?
+\end{itemize}
+
 \newpage
 
 %\appendix
