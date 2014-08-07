@@ -120,6 +120,7 @@ I am least familiar with this option.
 Model based optimisation using a standard tool is possible, but we would have to deal with a growing parameter space.
 In principle this should be ok, using arc kernels for GPs (see raiders of the lost architecture) or flags that turn off parameters in Random Forest (\eg auto WEKA).
 We would almost certainly need to include categorical parameters that indicated the dimension and type of kernel being used to generalise successfully.
+I have discussed this with Holger Hoos (of auto WEKA fame) but he doesn't think there are any particularly nice solutions to this problem aside from truncating the search tree at a certain depth and then flattening the parameter space.
 
 We could also view this as a multi-output Bayesian optimisation problem / racing algorithms problem.
 This would involve computing cheap approximations to the marginal likelihood \eg via FITC or by random kitchen sinks and gradually prune which models should not be considered (optimised) further.
@@ -285,13 +286,25 @@ So, something predicting changes in Bayes factors will have to estimate the curr
 
 The scaling of marginal likelihoods depends on the model.
 This scaling will depend on the models being compared and the true data generation process.
-Doing fancy mathematics seems like a difficult route given that we ultimately need to predict the Bayes factor after running an optimiser.-
+Doing fancy mathematics seems like a difficult route given that we ultimately need to predict the Bayes factor after running an optimiser.
 
 \subsection{Next steps}
 
 \begin{itemize}
   \item What statistics will best characterise the scaling of the marginal likelihood and Bayes factors?
   \item Or can we do some more mathematics?
+\end{itemize}
+
+\section{7 August - Some additional thoughts post AAAI}
+
+Ultimately we may want to compare models for which marginal likelihoods are too complex to calculate.
+We might instead use predictive likelihoods; possibily pointwise predictive likehoods (ignoring the joint distribution between all data points).
+This would get round the Bayes factor scaling issue.
+
+\subsection{Next steps}
+
+\begin{itemize}
+  \item Make a simple demonstration of this learning system working in 1d with SEs and PERs using Bayes factors and pointwise predictive likelihoods to demonstrate that the method is viable.
 \end{itemize}
 
 \newpage
